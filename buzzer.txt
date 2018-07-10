@@ -1,0 +1,348 @@
+#define SILENT_NOTE		0xFF
+#define DIV_BY_10		(1 << 15)
+
+const char *buzzerSequence;
+int staccato_rest_duration;
+int octave = 4;
+int staccato = 0;
+unsigned int note_type = 4;
+int whole_note_duration = 2000;
+int duration = 500;
+int volume = 15;
+
+void nextNote();
+
+void playFrequency(int freq, int dur, int volume) {
+	Beep(freq, dur*2);
+	if (buzzerSequence) nextNote();
+}
+
+void playNote(unsigned char note, unsigned int dur, unsigned char volume)
+{
+	// note = key + octave * 12, where 0 <= key < 12
+	// example: A4 = A + 4 * 12, where A = 9 (so A4 = 57)
+	// A note is converted to a frequency by the formula:
+	//   Freq(n) = Freq(0) * a^n
+	// where
+	//   Freq(0) is chosen as A4, which is 440 Hz
+	// and
+	//   a = 2 ^ (1/12)
+	// n is the number of notes you are away from A4.
+	// One can see that the frequency will double every 12 notes.
+	// This function exploits this property by defining the frequencies of the
+	// 12 lowest notes allowed and then doubling the appropriate frequency
+	// the appropriate number of times to get the frequency for the specified
+	// note.
+
+	// if note = 16, freq = 41.2 Hz (E1 - lower limit as freq must be >40 Hz)
+	// if note = 57, freq = 440 Hz (A4 - central value of ET Scale)
+	// if note = 111, freq = 9.96 kHz (D#9 - upper limit, freq must be <10 kHz)
+	// if note = 255, freq = 1 kHz and buzzer is silent (silent note)
+
+	// The most significant bit of freq is the "divide by 10" bit.  If set,
+	// the units for frequency are .1 Hz, not Hz, and freq must be divided
+	// by 10 to get the true frequency in Hz.  This allows for an extra digit
+	// of resolution for low frequencies without the need for using floats.
+
+#ifdef _ORANGUTAN_X2
+
+	init();								// initializes the buzzer if necessary
+	buzzerFinished = 0;
+	DISABLE_TIMER1_INTERRUPT();
+	OrangutanX2::setVolume(volume);
+	OrangutanX2::playNote(note, dur);
+	buzzerTimeout = dur;				// timeout = dur since timer 1 ticks at 1 kHz
+	TIFR1 |= 0xFF;						// clear any pending t1 overflow int.
+	ENABLE_TIMER1_INTERRUPT();			// also enable timer 1 interrupts here when
+										//  using Orangutan X2
+	sei();
+
+#else
+
+	unsigned int freq = 0;
+	unsigned char offset_note = note - 16;
+
+	if (note == SILENT_NOTE || volume == 0)
+	{
+		freq = 1000;	// silent notes => use 1kHz freq (for cycle counter)
+		playFrequency(freq, dur, 0);
+		return;
+	}
+
+	if (note <= 16)
+		offset_note = 0;
+	else if (offset_note > 95)
+		offset_note = 95;
+
+	unsigned char exponent = offset_note / 12;
+
+	// frequency table for the lowest 12 allowed notes
+	//   frequencies are specified in tenths of a Hertz for added resolution
+	switch (offset_note - exponent * 12)	// equivalent to (offset_note % 12)
+	{
+	case 0:				// note E1 = 41.2 Hz
+		freq = 412;
+		break;
+	case 1:				// note F1 = 43.7 Hz
+		freq = 437;
+		break;
+	case 2:				// note F#1 = 46.3 Hz
+		freq = 463;
+		break;
+	case 3:				// note G1 = 49.0 Hz
+		freq = 490;
+		break;
+	case 4:				// note G#1 = 51.9 Hz
+		freq = 519;
+		break;
+	case 5:				// note A1 = 55.0 Hz
+		freq = 550;
+		break;
+	case 6:				// note A#1 = 58.3 Hz
+		freq = 583;
+		break;
+	case 7:				// note B1 = 61.7 Hz
+		freq = 617;
+		break;
+	case 8:				// note C2 = 65.4 Hz
+		freq = 654;
+		break;
+	case 9:				// note C#2 = 69.3 Hz
+		freq = 693;
+		break;
+	case 10:			// note D2 = 73.4 Hz
+		freq = 734;
+		break;
+	case 11:			// note D#2 = 77.8 Hz
+		freq = 778;
+		break;
+	}
+
+	if (exponent < 7)
+	{
+		freq = freq << exponent;	// frequency *= 2 ^ exponent
+		if (exponent > 1)			// if the frequency is greater than 160 Hz
+			freq = (freq + 5) / 10;	//   we don't need the extra resolution
+		else
+			freq += DIV_BY_10;		// else keep the added digit of resolution
+	}
+	else
+		freq = (freq * 64 + 2) / 5;	// == freq * 2^7 / 10 without int overflow
+
+	if (volume > 15)
+		volume = 15;
+	playFrequency(freq, dur, volume);	// set buzzer this freq/duration
+#endif // _ORANGUTAN_X2
+}
+
+char currentCharacter()
+{
+	char c = 0;
+	do
+	{
+		/*if (use_program_space)
+			c = pgm_read_byte(buzzerSequence);
+		else*/
+			c = *buzzerSequence;
+
+		if (c >= 'A' && c <= 'Z')
+			c += 'a' - 'A';
+	} while (c == ' ' && (buzzerSequence++));
+
+	return c;
+}
+
+#define NOTE_C(x)			( 0 + (x)*12)
+#define NOTE_C_SHARP(x)		( 1 + (x)*12)
+#define NOTE_D_FLAT(x)		( 1 + (x)*12)
+#define NOTE_D(x)			( 2 + (x)*12)
+#define NOTE_D_SHARP(x)		( 3 + (x)*12)
+#define NOTE_E_FLAT(x)		( 3 + (x)*12)
+#define NOTE_E(x)			( 4 + (x)*12)
+#define NOTE_F(x)			( 5 + (x)*12)
+#define NOTE_F_SHARP(x)		( 6 + (x)*12)
+#define NOTE_G_FLAT(x)		( 6 + (x)*12)
+#define NOTE_G(x)			( 7 + (x)*12)
+#define NOTE_G_SHARP(x)		( 8 + (x)*12)
+#define NOTE_A_FLAT(x)		( 8 + (x)*12)
+#define NOTE_A(x)			( 9 + (x)*12)
+#define NOTE_A_SHARP(x)		(10 + (x)*12)
+#define NOTE_B_FLAT(x)		(10 + (x)*12)
+#define NOTE_B(x)			(11 + (x)*12)
+
+
+unsigned int getNumber()
+{
+	unsigned int arg = 0;
+
+	// read all digits, one at a time
+	char c = currentCharacter();
+	while (c >= '0' && c <= '9')
+	{
+		arg *= 10;
+		arg += c - '0';
+		buzzerSequence++;
+		c = currentCharacter();
+	}
+
+	return arg;
+}
+void nextNote()
+{
+	unsigned char note = 0;
+	unsigned char rest = 0;
+	unsigned char tmp_octave = octave; // the octave for this note
+	unsigned int tmp_duration; // the duration of this note
+	unsigned int dot_add;
+
+	char c; // temporary variable
+
+			// if we are playing staccato, after every note we play a rest
+	if (staccato && staccato_rest_duration)
+	{
+		playNote(SILENT_NOTE, staccato_rest_duration, 0);
+		staccato_rest_duration = 0;
+		return;
+	}
+
+parse_character:
+
+	// Get current character
+	c = currentCharacter();
+	buzzerSequence++;
+
+	// Interpret the character.
+	switch (c)
+	{
+	case '>':
+		// shift the octave temporarily up
+		tmp_octave++;
+		goto parse_character;
+	case '<':
+		// shift the octave temporarily down
+		tmp_octave--;
+		goto parse_character;
+	case 'a':
+		note = NOTE_A(0);
+		break;
+	case 'b':
+		note = NOTE_B(0);
+		break;
+	case 'c':
+		note = NOTE_C(0);
+		break;
+	case 'd':
+		note = NOTE_D(0);
+		break;
+	case 'e':
+		note = NOTE_E(0);
+		break;
+	case 'f':
+		note = NOTE_F(0);
+		break;
+	case 'g':
+		note = NOTE_G(0);
+		break;
+	case 'l':
+		// set the default note duration
+		note_type = getNumber();
+		duration = whole_note_duration / note_type;
+		goto parse_character;
+	case 'm':
+		// set music staccato or legato
+		if (currentCharacter() == 'l')
+			staccato = false;
+		else
+		{
+			staccato = true;
+			staccato_rest_duration = 0;
+		}
+		buzzerSequence++;
+		goto parse_character;
+	case 'o':
+		// set the octave permanently
+		octave = getNumber();
+		tmp_octave = octave;
+		goto parse_character;
+	case 'r':
+		// Rest - the note value doesn't matter.
+		rest = 1;
+		break;
+	case 't':
+		// set the tempo
+		whole_note_duration = 60 * 400 / getNumber() * 10;
+		duration = whole_note_duration / note_type;
+		goto parse_character;
+	case 'v':
+		// set the volume
+		volume = getNumber();
+		goto parse_character;
+	case '!':
+		// reset to defaults
+		octave = 4;
+		whole_note_duration = 2000;
+		note_type = 4;
+		duration = 500;
+		volume = 15;
+		staccato = 0;
+		// reset temp variables that depend on the defaults
+		tmp_octave = octave;
+		tmp_duration = duration;
+		goto parse_character;
+	default:
+		buzzerSequence = 0;
+		return;
+	}
+
+	note += tmp_octave * 12;
+
+	// handle sharps and flats
+	c = currentCharacter();
+	while (c == '+' || c == '#')
+	{
+		buzzerSequence++;
+		note++;
+		c = currentCharacter();
+	}
+	while (c == '-')
+	{
+		buzzerSequence++;
+		note--;
+		c = currentCharacter();
+	}
+
+	// set the duration of just this note
+	tmp_duration = duration;
+
+	// If the input is 'c16', make it a 16th note, etc.
+	if (c > '0' && c < '9')
+		tmp_duration = whole_note_duration / getNumber();
+
+	// Handle dotted notes - the first dot adds 50%, and each
+	// additional dot adds 50% of the previous dot.
+	dot_add = tmp_duration / 2;
+	while (currentCharacter() == '.')
+	{
+		buzzerSequence++;
+		tmp_duration += dot_add;
+		dot_add /= 2;
+	}
+
+	if (staccato)
+	{
+		staccato_rest_duration = tmp_duration / 2;
+		tmp_duration -= staccato_rest_duration;
+	}
+
+	// this will re-enable the timer1 overflow interrupt
+	playNote(rest ? SILENT_NOTE : note, tmp_duration, volume);
+}
+
+void play(const char *notes)
+{
+	//DISABLE_TIMER1_INTERRUPT();	// prevent this from being interrupted
+	buzzerSequence = notes;
+	//use_program_space = 0;
+	staccato_rest_duration = 0;
+	nextNote();					// this re-enables the timer1 interrupt
+}

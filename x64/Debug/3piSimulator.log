@@ -1,0 +1,38 @@
+﻿  Simulator.cpp
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\include\orangutanmotors.h(18): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\include\orangutanmotors.h(19): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\include\orangutanlcd.h(38): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(1772): note: see declaration of 'sprintf'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\include\orangutanlcd.h(44): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdio.h(1772): note: see declaration of 'sprintf'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\include\timer.h(40): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\include\timer.h(52): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\include\timer.h(80): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(548): warning C4838: conversion from 'int' to 'char' requires a narrowing conversion
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(548): warning C4309: 'initializing': truncation of constant value
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(636): warning C4838: conversion from 'int' to 'char' requires a narrowing conversion
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(636): warning C4309: 'initializing': truncation of constant value
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(787): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(792): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(793): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(802): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(805): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(812): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(815): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(861): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(872): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(873): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(874): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(875): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(877): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(878): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(879): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(880): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(881): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(887): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(917): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(925): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(925): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(928): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\jr\downloads\3pisimulator - joma final com printscreen\source\simulator.cpp(1002): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  3piSimulator.vcxproj -> C:\Users\jr\Downloads\3piSimulator - JOMA final com printScreen\x64\Debug\3piSimulator.exe
