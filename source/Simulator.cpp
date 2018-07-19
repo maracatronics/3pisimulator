@@ -3,6 +3,7 @@
 #include <OrangutanMotors.h>
 #include <OrangutanPushbuttons.h>
 #include <OrangutanLCD.h>
+#include <OrangutanLEDs.h>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -21,13 +22,14 @@ int OrangutanPushbuttons::buttonBState;
 int OrangutanPushbuttons::buttonCState;
 float OrangutanMotors::vright;
 float OrangutanMotors::vleft;
+int OrangutanLEDs::leftLED;
+int OrangutanLEDs::rightLED;
 
 int OrangutanLCD::x;
 int OrangutanLCD::y;
 int OrangutanLCD::offsetx;
 int OrangutanLCD::offsety;
 char OrangutanLCD::content[2][8];
-
 
 char OrangutanLCD::ascii[256][8] = {
 	// implementacao do repo 
@@ -553,7 +555,7 @@ char OrangutanLCD::ascii[256][8] = {
 #define WINDOW_NAME "3piSimulator"
 #define START_BUTTON_X 650
 #define START_BUTTON_Y 425
-#define RESET_BUTTON_X 900 - 50 - reset_button.cols
+#define RESET_BUTTON_X 900 - 50 - resetButton.cols
 #define RESET_BUTTON_Y 425
 
 #define A_BUTTON_X ((1500 - model3pi.cols) / 2)
@@ -585,11 +587,13 @@ Mat mini3piMask;
 Mat model3pi;
 Mat model3piMask;
 Mat button;
-Mat reset_button;
-Mat start_button;
-Mat pause_button;
+Mat resetButton;
+Mat startButton;
+Mat pauseButton;
 Mat sensorLED[2];
 Mat ledMask;
+Mat redLED[2];
+Mat greenLED[2];
 
 Point mouse;
 
@@ -614,6 +618,7 @@ void draw3piRobot();
 void draw3piModel();
 void drawButtons();
 void drawSensorsLEDs();
+void drawLEDs();
 void drawLCD();
 void drawChrono();
 void CallBackFunc(int events, int x, int y, int flags, void *userdata);
@@ -743,9 +748,15 @@ void readImages() {
 	circle(ledMask, Point(ledMask.cols / 2, ledMask.rows / 2), ledMask.cols / 2, Scalar(255, 255, 255), -1);
 
 	// start, pause and reset buttons
-	reset_button = imread("reset.png");
-	start_button = imread("start.png");
-	pause_button = imread("pause.png");
+	resetButton = imread("reset.png");
+	startButton = imread("start.png");
+	pauseButton = imread("pause.png");
+
+	// programable LEDs
+	redLED[0] = imread("led48_red_0.png");
+	redLED[1] = imread("led48_red_1.png");
+	greenLED[0] = imread("led48_green_0.png");
+	greenLED[1] = imread("led48_green_1.png");
 }
 
 void simulateAndShow() {
@@ -763,6 +774,8 @@ void simulateAndShow() {
 		drawSensorsLEDs();
 		drawLCD();
 		drawChrono();
+		
+		drawLEDs();
 
 		cvui::update();
 
@@ -938,7 +951,6 @@ void draw3piModel() {
 }
 
 void drawButtons() {
-
 	// A, B, C
 	cvui::image(frame, ((1500 - model3pi.cols) / 2) + 54, 30 + 133, button);
 	cvui::image(frame, ((1500 - model3pi.cols) / 2) + 92, 30 + 133, button);
@@ -946,10 +958,10 @@ void drawButtons() {
 
 	// start, pause and reset 
 	if (paused)
-		cvui::image(frame, START_BUTTON_X, START_BUTTON_Y, start_button);
+		cvui::image(frame, START_BUTTON_X, START_BUTTON_Y, startButton);
 	else
-		cvui::image(frame, START_BUTTON_X, START_BUTTON_Y, pause_button);
-	cvui::image(frame, RESET_BUTTON_X, RESET_BUTTON_Y, reset_button);
+		cvui::image(frame, START_BUTTON_X, START_BUTTON_Y, pauseButton);
+	cvui::image(frame, RESET_BUTTON_X, RESET_BUTTON_Y, resetButton);
 }
 
 void drawSensorsLEDs() {
@@ -965,6 +977,25 @@ void drawSensorsLEDs() {
 	}
 }
 
+void drawLEDs() {
+	Rect WhereRedRec(713, 45, ledMask.cols, ledMask.rows);
+	Rect WhereGreenRec(770, 45, ledMask.cols, ledMask.rows);
+	
+	if (OrangutanLEDs::leftLED) {
+		redLED[1].copyTo(frame(WhereRedRec), ledMask);
+	}
+	else {
+		redLED[0].copyTo(frame(WhereRedRec), ledMask);
+	}
+
+	if (OrangutanLEDs::rightLED) {
+		greenLED[1].copyTo(frame(WhereGreenRec), ledMask);
+	}
+	else {
+		greenLED[0].copyTo(frame(WhereGreenRec), ledMask);
+	}
+}
+
 void drawChrono() {
 	cvui::printf(frame, 675, 300, 1, 0xffffff, "%d'%2d\"%0d", timer.getMin(), timer.getSecs() % 60, timer.getMilliSecs() % 1000);
 }
@@ -974,27 +1005,27 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata) {
 	char choosed_button;
 	bool over_a_button = false;
 
-	if (((mouse_pos & Rect(START_BUTTON_X, START_BUTTON_Y, start_button.cols, start_button.rows)) == mouse_pos)) {
+	if (((mouse_pos & Rect(START_BUTTON_X, START_BUTTON_Y, startButton.cols, startButton.rows)) == mouse_pos)) {
 		// start/pause
 		choosed_button = 'p';
 		over_a_button = true;
 	}
-	else if (((mouse_pos & Rect(RESET_BUTTON_X, RESET_BUTTON_Y, start_button.cols, start_button.rows)) == mouse_pos)) {
+	else if (((mouse_pos & Rect(RESET_BUTTON_X, RESET_BUTTON_Y, startButton.cols, startButton.rows)) == mouse_pos)) {
 		// reset
 		choosed_button = 'r';
 		over_a_button = true;
 	}
-	else if (((mouse_pos & Rect(A_BUTTON_X, A_BUTTON_Y, start_button.cols, start_button.rows)) == mouse_pos)) {
+	else if (((mouse_pos & Rect(A_BUTTON_X, A_BUTTON_Y, startButton.cols, startButton.rows)) == mouse_pos)) {
 		// A
 		choosed_button = 'a';
 		over_a_button = true;
 	}
-	else if (((mouse_pos & Rect(B_BUTTON_X, B_BUTTON_Y, start_button.cols, start_button.rows)) == mouse_pos)) {
+	else if (((mouse_pos & Rect(B_BUTTON_X, B_BUTTON_Y, startButton.cols, startButton.rows)) == mouse_pos)) {
 		// B
 		choosed_button = 'b';
 		over_a_button = true;
 	}
-	else if (((mouse_pos & Rect(C_BUTTON_X, C_BUTTON_Y, start_button.cols, start_button.rows)) == mouse_pos)) {
+	else if (((mouse_pos & Rect(C_BUTTON_X, C_BUTTON_Y, startButton.cols, startButton.rows)) == mouse_pos)) {
 		// C
 		choosed_button = 'c';
 		over_a_button = true;

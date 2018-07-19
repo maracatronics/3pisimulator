@@ -104,108 +104,18 @@ void display_readings(const unsigned int *calibrated_values)
 	}
 }
 
-// Initializes the 3pi, displays a welcome message, calibrates, and
-// plays the initial music.  This function is automatically called
-// by the Arduino framework at the start of program execution.
 void setup()
-{/*
-	unsigned int counter; // used as a simple timer
-
-						  // This must be called at the beginning of 3pi code, to set up the
-						  // sensors.  We use a value of 2000 for the timeout, which
-						  // corresponds to 2000*0.4 us = 0.8 ms on our 20 MHz processor.
-	robot.init(2000);
-
-	load_custom_characters(); // load the custom characters
-
-							  // Play welcome music and display a message
-	OrangutanLCD::printFromProgramSpace(welcome_line1);
-	OrangutanLCD::gotoXY(0, 1);
-	OrangutanLCD::printFromProgramSpace(welcome_line2);
-	OrangutanBuzzer::playFromProgramSpace(welcome);
-	delay(1000);
-
-	OrangutanLCD::clear();
-	OrangutanLCD::printFromProgramSpace(demo_name_line1);
-	OrangutanLCD::gotoXY(0, 1);
-	OrangutanLCD::printFromProgramSpace(demo_name_line2);
-	delay(1000);
-
-	// Display battery voltage and wait for button press
-	while (!OrangutanPushbuttons::isPressed(BUTTON_B))
-	{
-		int bat = OrangutanAnalog::readBatteryMillivolts();
-
-		OrangutanLCD::clear();
-		OrangutanLCD::print(bat);
-		OrangutanLCD::print("mV");
-		OrangutanLCD::gotoXY(0, 1);
-		OrangutanLCD::print("Press B");
-
-		delay(100);
-	}
-
-	// Always wait for the button to be released so that 3pi doesn't
-	// start moving until your hand is away from it.
-	OrangutanPushbuttons::waitForRelease(BUTTON_B);
-	delay(1000);
-
-	// Auto-calibration: turn right and left while calibrating the
-	// sensors.
-	for (counter = 0; counter<80; counter++)
-	{
-		if (counter < 20 || counter >= 60)
-			OrangutanMotors::setSpeeds(40, -40);
-		else
-			OrangutanMotors::setSpeeds(-40, 40);
-
-		// This function records a set of sensor readings and keeps
-		// track of the minimum and maximum values encountered.  The
-		// IR_EMITTERS_ON argument means that the IR LEDs will be
-		// turned on during the reading, which is usually what you
-		// want.
-		robot.calibrateLineSensors(IR_EMITTERS_ON);
-
-		// Since our counter runs to 80, the total delay will be
-		// 80*20 = 1600 ms.
-		delay(20);
-	}
-	OrangutanMotors::setSpeeds(0, 0);
-
-	// Display calibrated values as a bar graph.
-	while (!OrangutanPushbuttons::isPressed(BUTTON_B))
-	{
-		// Read the sensor values and get the position measurement.
-		unsigned int position = robot.readLine(sensors, IR_EMITTERS_ON);
-		// Display the position measurement, which will go from 0
-		// (when the leftmost sensor is over the line) to 4000 (when
-		// the rightmost sensor is over the line) on the 3pi, along
-		// with a bar graph of the sensor readings.  This allows you
-		// to make sure the robot is ready to go.
-		OrangutanLCD::clear();
-		OrangutanLCD::print(position);
-		OrangutanLCD::gotoXY(0, 1);
-		display_readings(sensors);
-
-		delay(100);
-	}
-	OrangutanPushbuttons::waitForRelease(BUTTON_B);
-
-	OrangutanLCD::clear();
-
-	OrangutanLCD::print("Go!");
-
-	// Play music and wait for it to finish before we start driving.
-	OrangutanBuzzer::playFromProgramSpace(go);
-	while (OrangutanBuzzer::isPlaying());
-	*/
+{
+	OrangutanLEDs::left(HIGH);
+	OrangutanLEDs::right(LOW);
+	delay(3000);
+	OrangutanLEDs::left(LOW);
+	OrangutanLEDs::right(HIGH);
+	delay(3000);
 }
 
-// The main function.  This function is repeatedly called by
-// the Arduino framework.
 void loop()
 {
-	
 	// Get the position of the line.  Note that we *must* provide
 	// the "sensors" argument to read_line() here, even though we
 	// are not interested in the individual sensor readings.
@@ -213,17 +123,8 @@ void loop()
 
 	if (position < 1000) // 0 - 999
 	{
-		// We are far to the right of the line: turn left.
-
-		// Set the right motor to 100 and the left motor to zero,
-		// to do a sharp turn to the left.  Note that the maximum
-		// value of either motor speed is 255, so we are driving
-		// it at just about 40% of the max.
 		OrangutanMotors::setSpeeds(0, VEL);
-		//OrangutanMotors::setSpeeds(VEL, 0);
 
-		// Just for fun, indicate the direction we are turning on
-		// the LEDs.
 		OrangutanLEDs::left(HIGH);
 		OrangutanLEDs::right(LOW);
 	}
