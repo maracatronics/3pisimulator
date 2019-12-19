@@ -9,3 +9,8 @@ O simulador funciona de forma a implementar as mesmas biblioteca usadas pelo 3pi
 O código de controle é o ```SimpleLineFollower.cpp```. Para testar seu código, é só alterar esse arquivo.
 
 ![Alt text](pic_filetree.png)
+
+
+## Requisitor
+
+Precisa do Visual Studio 2019 com extensão de C++.
