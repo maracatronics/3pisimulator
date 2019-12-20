@@ -11,6 +11,6 @@ O código de controle é o ```SimpleLineFollower.cpp```. Para testar seu código
 ![Alt text](pic_filetree.png)
 
 
-## Requisitor
+## Requisitos
 
-Precisa do Visual Studio 2019 com extensão de C++.
+Precisa do Visual Studio 2017 ou 2019 com extensão de desenvolvimento de C++ ([*Desktop development with C++*](https://visualstudio.microsoft.com/vs/features/cplusplus/)).
